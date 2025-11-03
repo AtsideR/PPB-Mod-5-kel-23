@@ -1,36 +1,31 @@
 // src/pages/EditRecipePage.jsx
-import { useState, useEffect } from "react";
-import {
-  ArrowLeft,
-  Upload,
-  X,
-  Plus,
-  Image as ImageIcon,
-  Loader,
-} from "lucide-react";
-import recipeService from "../services/recipeService";
-import uploadService from "../services/uploadService";
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Upload, X, Plus, Image as ImageIcon, Loader } from 'lucide-react';
+import recipeService from '../services/recipeService';
+import uploadService from '../services/uploadService';
 
 export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: "",
-    category: "makanan",
-    description: "",
-    prep_time: "",
-    cook_time: "",
-    servings: "",
-    difficulty: "mudah",
+    name: '',
+    category: 'makanan',
+    description: '',
+    prep_time: '',
+    cook_time: '',
+    servings: '',
+    difficulty: 'mudah',
     is_featured: false,
   });
-  const [currentImageUrl, setCurrentImageUrl] = useState("");
+
+  const [currentImageUrl, setCurrentImageUrl] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [ingredients, setIngredients] = useState([{ name: "", quantity: "" }]);
-  const [steps, setSteps] = useState([""]);
+  const [ingredients, setIngredients] = useState([{ name: '', quantity: '' }]);
+  const [steps, setSteps] = useState(['']);
+  
   const [uploading, setUploading] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   // Load recipe data
   useEffect(() => {
@@ -38,48 +33,49 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
       try {
         setLoading(true);
         const result = await recipeService.getRecipeById(recipeId);
+        
         if (result.success) {
           const recipe = result.data;
           setFormData({
-            name: recipe.name || "",
-            category: recipe.category || "makanan",
-            description: recipe.description || "",
-            prep_time: recipe.prep_time || "",
-            cook_time: recipe.cook_time || "",
-            servings: recipe.servings || "",
-            difficulty: recipe.difficulty || "mudah",
+            name: recipe.name || '',
+            category: recipe.category || 'makanan',
+            description: recipe.description || '',
+            prep_time: recipe.prep_time || '',
+            cook_time: recipe.cook_time || '',
+            servings: recipe.servings || '',
+            difficulty: recipe.difficulty || 'mudah',
             is_featured: recipe.is_featured || false,
           });
-          setCurrentImageUrl(recipe.image_url || "");
-          setIngredients(
-            recipe.ingredients && recipe.ingredients.length > 0
-              ? recipe.ingredients
-              : [{ name: "", quantity: "" }]
+          
+          setCurrentImageUrl(recipe.image_url || '');
+          setIngredients(recipe.ingredients && recipe.ingredients.length > 0 
+            ? recipe.ingredients 
+            : [{ name: '', quantity: '' }]
           );
-          // Convert steps to array of strings if they're
-          // objects
-          let stepsArray = [""];
+          
+          // Convert steps to array of strings if they're objects
+          let stepsArray = [''];
           if (recipe.steps && recipe.steps.length > 0) {
-            stepsArray = recipe.steps.map((step) => {
-              // If step is an object with a 'step'
-              // property, extract it
-              if (typeof step === "object" && step.step) {
+            stepsArray = recipe.steps.map(step => {
+              // If step is an object with a 'step' property, extract it
+              if (typeof step === 'object' && step.step) {
                 return step.step;
               }
               // If step is already a string, use it
-              return typeof step === "string" ? step : "";
+              return typeof step === 'string' ? step : '';
             });
           }
           setSteps(stepsArray);
         } else {
-          throw new Error("Gagal memuat data resep");
+          throw new Error('Gagal memuat data resep');
         }
       } catch (err) {
-        setError(err.message || "Terjadi kesalahan saat memuat resep");
+        setError(err.message || 'Terjadi kesalahan saat memuat resep');
       } finally {
         setLoading(false);
       }
     };
+
     if (recipeId) {
       loadRecipe();
     }
@@ -89,20 +85,23 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError("Ukuran file maksimal 5MB");
+      setError('Ukuran file maksimal 5MB');
       return;
     }
+
     // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      setError("Format file harus .jpg, .jpeg, .png, atau .webp");
+      setError('Format file harus .jpg, .jpeg, .png, atau .webp');
       return;
     }
+
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
-    setError("");
+    setError('');
   };
 
   // Remove new image (revert to original)
@@ -116,15 +115,15 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
 
   // Remove original image
   const handleRemoveOriginalImage = () => {
-    setCurrentImageUrl("");
+    setCurrentImageUrl('');
   };
 
   // Handle form field changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -134,9 +133,11 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
     newIngredients[index][field] = value;
     setIngredients(newIngredients);
   };
+
   const addIngredient = () => {
-    setIngredients([...ingredients, { name: "", quantity: "" }]);
+    setIngredients([...ingredients, { name: '', quantity: '' }]);
   };
+
   const removeIngredient = (index) => {
     if (ingredients.length > 1) {
       setIngredients(ingredients.filter((_, i) => i !== index));
@@ -149,9 +150,11 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
     newSteps[index] = value;
     setSteps(newSteps);
   };
+
   const addStep = () => {
-    setSteps([...steps, ""]);
+    setSteps([...steps, '']);
   };
+
   const removeStep = (index) => {
     if (steps.length > 1) {
       setSteps(steps.filter((_, i) => i !== index));
@@ -161,65 +164,72 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
   // Validate form
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setError("Nama resep wajib diisi");
+      setError('Nama resep wajib diisi');
       return false;
     }
+
     if (formData.name.trim().length < 3) {
-      setError("Nama resep minimal 3 karakter");
+      setError('Nama resep minimal 3 karakter');
       return false;
     }
+
     if (!formData.prep_time || formData.prep_time <= 0) {
-      setError("Waktu persiapan harus lebih dari 0");
+      setError('Waktu persiapan harus lebih dari 0');
       return false;
     }
+
     if (!formData.cook_time || formData.cook_time <= 0) {
-      setError("Waktu memasak harus lebih dari 0");
+      setError('Waktu memasak harus lebih dari 0');
       return false;
     }
+
     if (!formData.servings || formData.servings <= 0) {
-      setError("Jumlah porsi harus lebih dari 0");
+      setError('Jumlah porsi harus lebih dari 0');
       return false;
     }
+
     // Validate ingredients
-    const validIngredients = ingredients.filter(
-      (ing) => ing.name.trim() && ing.quantity.trim()
-    );
+    const validIngredients = ingredients.filter(ing => ing.name.trim() && ing.quantity.trim());
     if (validIngredients.length === 0) {
-      setError("Minimal harus ada 1 bahan");
+      setError('Minimal harus ada 1 bahan');
       return false;
     }
+
     // Validate steps
-    const validSteps = steps.filter((step) => {
+    const validSteps = steps.filter(step => {
       // Ensure step is a string before calling trim
-      if (typeof step === "string") {
+      if (typeof step === 'string') {
         return step.trim();
       }
-      // If step is an object, check if it has a 'step'
-      // property
-      if (typeof step === "object" && step.step) {
+      // If step is an object, check if it has a 'step' property
+      if (typeof step === 'object' && step.step) {
         return step.step.trim();
       }
       return false;
     });
     if (validSteps.length === 0) {
-      setError("Minimal harus ada 1 langkah");
+      setError('Minimal harus ada 1 langkah');
       return false;
     }
+
     return true;
   };
 
-  // Submit form (PATCH
-  // partial update)
+  // Submit form (PATCH - partial update)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
+
     if (!validateForm()) {
       return;
     }
+
     try {
       setUpdating(true);
+
       // Prepare update data
       const updateData = {};
+
       // Step 1: Upload new image if selected
       if (imageFile) {
         setUploading(true);
@@ -227,34 +237,32 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
         if (uploadResult.success) {
           updateData.image_url = uploadResult.data.url;
         } else {
-          throw new Error("Gagal upload gambar");
+          throw new Error('Gagal upload gambar');
         }
         setUploading(false);
       } else if (!currentImageUrl && !imageFile) {
         // If original image was removed and no new image
-        updateData.image_url = "";
+        updateData.image_url = '';
       }
+
       // Step 2: Add other fields
-      const validIngredients = ingredients.filter(
-        (ing) => ing.name.trim() && ing.quantity.trim()
-      );
-      const validSteps = steps
-        .filter((step) => {
-          if (typeof step === "string") {
-            return step.trim();
-          }
-          if (typeof step === "object" && step.step) {
-            return step.step.trim();
-          }
-          return false;
-        })
-        .map((step) => {
-          // Convert to string if it's an object
-          if (typeof step === "object" && step.step) {
-            return step.step;
-          }
-          return step;
-        });
+      const validIngredients = ingredients.filter(ing => ing.name.trim() && ing.quantity.trim());
+      const validSteps = steps.filter(step => {
+        if (typeof step === 'string') {
+          return step.trim();
+        }
+        if (typeof step === 'object' && step.step) {
+          return step.step.trim();
+        }
+        return false;
+      }).map(step => {
+        // Convert to string if it's an object
+        if (typeof step === 'object' && step.step) {
+          return step.step;
+        }
+        return step;
+      });
+
       updateData.name = formData.name.trim();
       updateData.category = formData.category;
       updateData.description = formData.description.trim();
@@ -265,20 +273,22 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
       updateData.is_featured = formData.is_featured;
       updateData.ingredients = validIngredients;
       updateData.steps = validSteps;
+
       // Step 3: Update recipe using PUT
       const result = await recipeService.updateRecipe(recipeId, updateData);
+
       if (result.success) {
-        alert("Resep berhasil diperbarui!");
+        alert('Resep berhasil diperbarui!');
         if (onSuccess) {
           onSuccess(result.data);
         } else if (onBack) {
           onBack();
         }
       } else {
-        throw new Error(result.message || "Gagal memperbarui resep");
+        throw new Error(result.message || 'Gagal memperbarui resep');
       }
     } catch (err) {
-      setError(err.message || "Terjadi kesalahan saat memperbarui resep");
+      setError(err.message || 'Terjadi kesalahan saat memperbarui resep');
     } finally {
       setUpdating(false);
       setUploading(false);
@@ -295,6 +305,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 pb-20 md:pb-8">
       {/* Header */}
@@ -309,22 +320,26 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
           </button>
         </div>
       </div>
+
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-xl border border-white/40">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Edit Resep</h1>
           <p className="text-slate-600 mb-8">Perbarui informasi resepmu</p>
+
           {/* Error Message */}
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
               <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-3">
                 Foto Resep
               </label>
+              
               {/* Show new image preview if selected */}
               {imagePreview ? (
                 <div className="relative">
@@ -344,7 +359,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                     Gambar Baru
                   </div>
                 </div>
-              ) : currentImageUrl && currentImageUrl.trim() !== "" ? (
+              ) : currentImageUrl && currentImageUrl.trim() !== '' ? (
                 /* Show current image */
                 <div className="relative">
                   <img
@@ -362,7 +377,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                   <div className="absolute bottom-4 left-4">
                     <input
                       type="file"
-                      accept="image/jpeg, image/jpg,image/png,image/webp"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
                       onChange={handleImageChange}
                       className="hidden"
                       id="image-change"
@@ -377,11 +392,11 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                   </div>
                 </div>
               ) : (
-                /* No image. show upload area */
+                /* No image - show upload area */
                 <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-blue-400 transition-colors">
                   <input
                     type="file"
-                    accept="image/jpeg, image/jpg,image/png,image/webp"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
                     onChange={handleImageChange}
                     className="hidden"
                     id="image-upload"
@@ -394,9 +409,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                       <ImageIcon className="w-8 h-8 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-slate-700 font-medium">
-                        Klik untuk upload foto
-                      </p>
+                      <p className="text-slate-700 font-medium">Klik untuk upload foto</p>
                       <p className="text-sm text-slate-500 mt-1">
                         Maksimal 5MB (.jpg, .jpeg, .png, .webp)
                       </p>
@@ -405,6 +418,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 </div>
               )}
             </div>
+
             {/* Basic Info */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
@@ -421,6 +435,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Kategori <span className="text-red-500">*</span>
@@ -436,6 +451,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 </select>
               </div>
             </div>
+
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -450,12 +466,12 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
               />
             </div>
+
             {/* Time & Servings */}
             <div className="grid md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Waktu Persiapan (menit){" "}
-                  <span className="text-red-500">*</span>
+                  Waktu Persiapan (menit) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -468,6 +484,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Waktu Memasak (menit) <span className="text-red-500">*</span>
@@ -483,6 +500,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Porsi (orang) <span className="text-red-500">*</span>
@@ -499,6 +517,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 />
               </div>
             </div>
+
             {/* Difficulty */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -515,6 +534,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 <option value="sulit">Sulit</option>
               </select>
             </div>
+
             {/* Ingredients */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-3">
@@ -526,22 +546,14 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                     <input
                       type="text"
                       value={ingredient.name}
-                      onChange={(e) =>
-                        handleIngredientChange(index, "name", e.target.value)
-                      }
+                      onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
                       placeholder="Nama bahan"
                       className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <input
                       type="text"
                       value={ingredient.quantity}
-                      onChange={(e) =>
-                        handleIngredientChange(
-                          index,
-                          "quantity",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
                       placeholder="Jumlah"
                       className="w-32 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -565,6 +577,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 </button>
               </div>
             </div>
+
             {/* Steps */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-3">
@@ -603,6 +616,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 </button>
               </div>
             </div>
+
             {/* Featured Toggle */}
             <div className="flex items-center gap-3 bg-blue-50 p-4 rounded-xl">
               <input
@@ -613,13 +627,11 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                 onChange={handleChange}
                 className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
-              <label
-                htmlFor="is_featured"
-                className="text-sm text-slate-700 cursor-pointer"
-              >
+              <label htmlFor="is_featured" className="text-sm text-slate-700 cursor-pointer">
                 Tandai sebagai resep unggulan
               </label>
             </div>
+
             {/* Submit Buttons */}
             <div className="flex flex-col md:flex-row gap-4 pt-6">
               <button
@@ -646,7 +658,7 @@ export default function EditRecipePage({ recipeId, onBack, onSuccess }) {
                     Memperbarui resep...
                   </>
                 ) : (
-                  "Simpan Perubahan"
+                  'Simpan Perubahan'
                 )}
               </button>
             </div>

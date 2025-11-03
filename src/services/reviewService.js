@@ -75,6 +75,12 @@ class ReviewService {
       throw error;
     }
   }
-}
+
+  async getUserReviews(userId) {
+    const res = await apiClient.get(`/api/v1/users/${userId}/reviews`);
+    return res.data;
+  }
+};
+
 
 export default new ReviewService();
